@@ -1,16 +1,30 @@
 import os
 import sys
+import argparse
 
 from src.denoising_diffusion_pytorch import GaussianDiffusion
 from src.residual_denoising_diffusion_pytorch import (ResidualDiffusion,
                                                       Trainer, Unet, UnetRes,
                                                       set_seed)
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--folder", action="extend", nargs="+", type=str, required=True)
+    parser.add_argument("--condition", action="store_true")
+    parser.add_argument("--input_condition",action="store_true")
+    parser.add_argument("--original_ddim_ddpm", action="store_true")
+    parser.add_argument("--debug", action="store_true")
+    return parser.parse_args()
+
 # init
 os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(str(e) for e in [0])
 sys.stdout.flush()
 set_seed(10)
-debug = False
+args = parse_args()
+
+
+# debug = False
+debug = args.debug
 
 if debug:
     save_and_sample_every = 2
@@ -26,37 +40,41 @@ else:
     sampling_timesteps_original_ddim_ddpm = 250
     train_num_steps = 100000
 
-original_ddim_ddpm = False
+original_ddim_ddpm = args.original_ddim_ddpm
 if original_ddim_ddpm:
     condition = False
     input_condition = False
     input_condition_mask = False
 else:
-    condition = False
-    input_condition = False
+    # condition = False
+    # input_condition = False
     input_condition_mask = False
+    condition = args.condition
+    input_condition = args.input_condition
 
 if condition:
     # Image restoration  
-    if input_condition:
-        folder = ["xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_train.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_train.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_mask_train.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_test.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_test.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_mask_test.flist"]
-    else:
-        folder = ["xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_train.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_train.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_test.flist",
-                  "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_test.flist"]
+    # if input_condition:
+    #     folder = ["xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_train.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_train.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_mask_train.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_test.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_test.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_mask_test.flist"]
+    # else:
+    #     folder = ["xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_train.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_train.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_test.flist",
+    #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_test.flist"]
+    folder = args.folder
     train_batch_size = 1
     num_samples = 1
     sum_scale = 0.01
     image_size = 256
 else:
     # Image Generation 
-    folder = 'xxx/CelebA/img_align_celeba'
+    # folder = 'xxx/CelebA/img_align_celeba'
+    folder = args.folder
     train_batch_size = 128
     num_samples = 64
     sum_scale = 1
