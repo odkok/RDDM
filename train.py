@@ -10,6 +10,9 @@ from src.residual_denoising_diffusion_pytorch import (ResidualDiffusion,
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--folder", action="extend", nargs="+", type=str, required=True)
+    parser.add_argument("--batch_size", type=int, default=128)
+    parser.add_argument("--img_size", type=int, default=256)
+    parser.add_argument("--epoches", type=int, default=200)
     parser.add_argument("--condition", action="store_true")
     parser.add_argument("--input_condition",action="store_true")
     parser.add_argument("--original_ddim_ddpm", action="store_true")
@@ -30,7 +33,7 @@ if debug:
     save_and_sample_every = 2
     sampling_timesteps = 10
     sampling_timesteps_original_ddim_ddpm = 10
-    train_num_steps = 200
+    # train_num_steps = 200
 else:
     save_and_sample_every = 1000
     if len(sys.argv) > 1:
@@ -38,7 +41,10 @@ else:
     else:
         sampling_timesteps = 10
     sampling_timesteps_original_ddim_ddpm = 250
-    train_num_steps = 100000
+    # train_num_steps = 100000
+
+# override some hard code args by user input
+train_num_steps = args.epoches
 
 original_ddim_ddpm = args.original_ddim_ddpm
 if original_ddim_ddpm:
@@ -66,19 +72,22 @@ if condition:
     #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_train.flist",
     #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_free_test.flist",
     #               "xxx/dataset/ISTD_Dataset_arg/data_val/ISTD_shadow_test.flist"]
-    folder = args.folder
-    train_batch_size = 1
+    # train_batch_size = 1
     num_samples = 1
     sum_scale = 0.01
-    image_size = 256
+    # image_size = 256
 else:
     # Image Generation 
     # folder = 'xxx/CelebA/img_align_celeba'
-    folder = args.folder
-    train_batch_size = 128
+    # train_batch_size = 128
     num_samples = 64
     sum_scale = 1
-    image_size = 64
+    # image_size = 64
+
+# override some hard code args by user input
+folder = args.folder
+train_batch_size = args.batch_size
+image_size = args.img_size
 
 num_unet = 2
 objective = 'pred_res_noise'
